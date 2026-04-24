@@ -223,17 +223,6 @@ STOPS.forEach((s,i)=>{
 
 let activeEl=null;
 
-// Auto-select stop from URL parameter ?stop=N
-const urlParams=new URLSearchParams(window.location.search);
-const stopParam=parseInt(urlParams.get('stop'));
-if(stopParam){
-  const idx=STOPS.findIndex(s=>s.num===stopParam);
-  if(idx!==-1){
-    stopEls[idx].scrollIntoView({block:'center'});
-    loadWeather(STOPS[idx],stopEls[idx]);
-  }
-}
-
 async function loadWeather(stop, el){
   // Update active state
   if(activeEl) activeEl.classList.remove('active');
@@ -307,6 +296,17 @@ async function loadWeather(stop, el){
 
   }catch(e){
     panel.innerHTML+=`<div class="wx-error">Unable to load weather. Check your connection.<br>${e.message}</div>`;
+  }
+}
+
+// Auto-select stop from URL parameter ?stop=N — must run after loadWeather is defined
+const urlParams=new URLSearchParams(window.location.search);
+const stopParam=parseInt(urlParams.get('stop'));
+if(stopParam){
+  const idx=STOPS.findIndex(s=>s.num===stopParam);
+  if(idx!==-1){
+    stopEls[idx].scrollIntoView({block:'center'});
+    loadWeather(STOPS[idx],stopEls[idx]);
   }
 }
 </script>
