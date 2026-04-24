@@ -32,26 +32,8 @@ body{font-family:Georgia,serif;background:var(--cream);color:#222;font-size:14px
 /* LAYOUT */
 .layout{display:flex;min-height:calc(100vh - 90px);}
 
-/* STOP LIST */
-.stop-list{
-  width:260px;
-  flex-shrink:0;
-  background:var(--navy);
-  border-right:3px solid var(--gold);
-  overflow-y:auto;
-  padding:10px 0;
-}
-.stop-item{
-  padding:10px 16px;
-  cursor:pointer;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  transition:background .15s;
-}
-.stop-item:hover{background:rgba(200,135,58,.15);}
-.stop-item.active{background:rgba(200,135,58,.25);border-left:3px solid var(--gold);}
-.stop-num{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:2px;}
-.stop-name{font-size:13px;color:white;font-weight:600;line-height:1.3;}
-.stop-loc{font-size:11px;color:#7a9bbf;margin-top:1px;}
+/* STOP LIST - hidden */
+.stop-list{display:none;}
 
 /* WEATHER PANEL */
 .weather-panel{flex:1;padding:24px 30px;max-width:700px;}
@@ -144,17 +126,14 @@ body{font-family:Georgia,serif;background:var(--cream);color:#222;font-size:14px
 <div class="header">
   <div class="header-label">2026 Summer Road Trip &nbsp;&middot;&nbsp; Dave &amp; Jeani</div>
   <div class="header-title">Trip Weather</div>
-  <div class="header-sub">Select a stop to see current conditions &amp; 8-hour forecast</div>
+  <div class="header-sub">Current conditions &amp; 8-hour forecast</div>
 </div>
 
-<div class="layout">
-
-  <!-- STOP LIST -->
-  <div class="stop-list" id="stopList"></div>
+<div style="padding:24px 30px;max-width:700px;">
 
   <!-- WEATHER PANEL -->
-  <div class="weather-panel" id="weatherPanel">
-    <div class="no-selection">&#8592; Select a stop to see weather</div>
+  <div id="weatherPanel">
+    <div style="color:#6b7280;font-style:italic;padding:40px 0;text-align:center;">Loading weather&hellip;</div>
   </div>
 
 </div>
@@ -207,26 +186,14 @@ function fmtTime(iso){
   return h+ap;
 }
 
-// Build stop list
-const listEl=document.getElementById('stopList');
+// Stops available for auto-select only — no list rendered
 const stopEls=[];
-STOPS.forEach((s,i)=>{
-  const div=document.createElement('div');
-  div.className='stop-item';
-  div.innerHTML=`<div class="stop-num">Stop ${String(s.num).padStart(2,'0')}</div>
-    <div class="stop-name">${s.name}</div>
-    <div class="stop-loc">${s.loc}</div>`;
-  div.addEventListener('click',()=>loadWeather(s,div));
-  listEl.appendChild(div);
-  stopEls.push(div);
-});
 
 let activeEl=null;
 
 async function loadWeather(stop, el){
-  // Update active state
-  if(activeEl) activeEl.classList.remove('active');
-  el.classList.add('active');
+  if(activeEl && activeEl.classList) activeEl.classList.remove('active');
+  if(el && el.classList) el.classList.add('active');
   activeEl=el;
 
   const panel=document.getElementById('weatherPanel');
@@ -299,15 +266,12 @@ async function loadWeather(stop, el){
   }
 }
 
-// Auto-select stop from URL parameter ?stop=N — must run after loadWeather is defined
+// Auto-select stop from URL parameter ?stop=N
 const urlParams=new URLSearchParams(window.location.search);
 const stopParam=parseInt(urlParams.get('stop'));
 if(stopParam){
-  const idx=STOPS.findIndex(s=>s.num===stopParam);
-  if(idx!==-1){
-    stopEls[idx].scrollIntoView({block:'center'});
-    loadWeather(STOPS[idx],stopEls[idx]);
-  }
+  const stop=STOPS.find(s=>s.num===stopParam);
+  if(stop) loadWeather(stop, {classList:{add:()=>{},remove:()=>{}}});
 }
 </script>
 </body>
